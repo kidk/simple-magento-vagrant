@@ -3,6 +3,10 @@
 SAMPLE_DATA=$1
 MAGE_VERSION="1.9.1.0"
 DATA_VERSION="1.9.0.0"
+APT_FLAGS="-q --yes --force-yes"
+WGET_FLAGS="-q"
+TAR_FLAGS="-zxvf"
+export DEBIAN_FRONTEND=noninteractive
 
 # Update Apt
 # --------------------
@@ -53,10 +57,9 @@ service apache2 restart
 # Mysql
 # --------------------
 # Ignore the post install questions
-export DEBIAN_FRONTEND=noninteractive
-# Install MySQL quietly
-apt-get -q -y install mysql-server-5.5
 
+# Install MySQL quietly
+apt-get ${APT_FLAGS} install mysql-server-5.5
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS magentodb"
 mysql -u root -e "GRANT ALL PRIVILEGES ON magentodb.* TO 'magentouser'@'localhost' IDENTIFIED BY 'password'"
 mysql -u root -e "FLUSH PRIVILEGES"
@@ -70,8 +73,8 @@ mysql -u root -e "FLUSH PRIVILEGES"
 if [[ ! -f "/vagrant/httpdocs/index.php" ]]; then
   cd /vagrant/httpdocs
   https://github.com/OpenMage/magento-mirror/archive/1.9.2.2
-  wget https://github.com/OpenMage/magento-mirror/archive/${MAGE_VERSION}.tar.gz
-  tar -zxvf ${MAGE_VERSION}.tar.gz
+  wget ${WGET_FLAGS} https://github.com/OpenMage/magento-mirror/archive/${MAGE_VERSION}.tar.gz
+  tar ${TAR_FLAGS} ${MAGE_VERSION}.tar.gz
   mv magento/* magento/.htaccess .
   chmod -R o+w media var
   chmod o+w app/etc
@@ -86,10 +89,10 @@ if [[ $SAMPLE_DATA == "true" ]]; then
 
   if [[ ! -f "/vagrant/magento-sample-data-${DATA_VERSION}.tar.gz" ]]; then
     # Only download sample data if we need to
-    wget http://sourceforge.net/projects/mageloads/files/assets/${DATA_VERSION}/magento-sample-data-${DATA_VERSION}.tar.gz
+    wget ${WGET_FLAGS} http://sourceforge.net/projects/mageloads/files/assets/${DATA_VERSION}/magento-sample-data-${DATA_VERSION}.tar.gz
   fi
 
-  tar -zxvf magento-sample-data-${DATA_VERSION}.tar.gz
+  tar ${TAR_FLAGS} magento-sample-data-${DATA_VERSION}.tar.gz
   cp -R magento-sample-data-${DATA_VERSION}/media/* httpdocs/media/
   cp -R magento-sample-data-${DATA_VERSION}/skin/*  httpdocs/skin/
   mysql -u root magentodb < magento-sample-data-${DATA_VERSION}/magento_sample_data_for_${DATA_VERSION}.sql
@@ -114,6 +117,6 @@ fi
 # Install n98-magerun
 # --------------------
 cd /vagrant/httpdocs
-wget https://raw.github.com/netz98/n98-magerun/master/n98-magerun.phar
+wget ${WGET_FLAGS} https://raw.github.com/netz98/n98-magerun/master/n98-magerun.phar
 chmod +x ./n98-magerun.phar
 sudo mv ./n98-magerun.phar /usr/local/bin/
