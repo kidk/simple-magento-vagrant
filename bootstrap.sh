@@ -2,7 +2,6 @@
 
 SAMPLE_DATA=$1
 MAGE_VERSION="1.9.1.0"
-DATA_VERSION="1.9.0.0"
 DATA_VERSION="1.9.1.0"
 APT_FLAGS="-q --yes --force-yes"
 WGET_FLAGS="-q"
@@ -15,7 +14,7 @@ apt-get update
 
 # Install Apache & PHP
 # --------------------
-apt-get ${APT_FLAGS} install apache2 php5 libapache2-mod-php5 php5-mysqlnd php5-curl php5-xdebug php5-gd php5-intl php-pear php5-imap php5-mcrypt php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl php-soap
+apt-get ${APT_FLAGS} install apache2 php5 libapache2-mod-php5 php5-mysqlnd php5-curl php5-xdebug php5-gd php5-intl php-pear php5-imap php5-mcrypt php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl php-soap redis-server php5-redis
 
 php5enmod mcrypt
 
@@ -70,10 +69,9 @@ mysql -u root -e "FLUSH PRIVILEGES"
 # Download and extract
 if [[ ! -f "/vagrant/httpdocs/index.php" ]]; then
   cd /vagrant/httpdocs
-  https://github.com/OpenMage/magento-mirror/archive/1.9.2.2
   wget ${WGET_FLAGS} https://github.com/OpenMage/magento-mirror/archive/${MAGE_VERSION}.tar.gz
   tar ${TAR_FLAGS} ${MAGE_VERSION}.tar.gz
-  mv magento/* magento/.htaccess .
+  mv magento-mirror-${MAGE_VERSION}/* magento-mirror-${MAGE_VERSION}/.htaccess .
   chmod -R o+w media var
   chmod o+w app/etc
   # Clean up downloaded file and extracted dir
@@ -116,5 +114,9 @@ fi
 # --------------------
 cd /vagrant/httpdocs
 wget ${WGET_FLAGS} https://raw.github.com/netz98/n98-magerun/master/n98-magerun.phar
-chmod +x ./n98-magerun.phar
+chmod +x n98-magerun.phar
 sudo mv ./n98-magerun.phar /usr/local/bin/
+
+# Enable Redis integration
+# --------------------
+cp /vagrant/templates/redis.xml /vagrant/httpdocs/app/etc/modules/Cm_RedisSession.xml
