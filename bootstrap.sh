@@ -3,6 +3,7 @@
 SAMPLE_DATA=$1
 MAGE_VERSION="1.9.1.0"
 DATA_VERSION="1.9.0.0"
+DATA_VERSION="1.9.1.0"
 APT_FLAGS="-q --yes --force-yes"
 WGET_FLAGS="-q"
 TAR_FLAGS="-zxvf"
